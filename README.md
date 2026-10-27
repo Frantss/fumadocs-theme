@@ -19,6 +19,22 @@ Replace the app's existing Fumadocs color and preset CSS imports with this globa
 
 The theme imports the Fumadocs preset, semantic colors, and self-hosted Geist Mono font. Keep the app's Tailwind PostCSS setup and Fumadocs provider.
 
+### Vite SSR and TanStack Start
+
+Add the theme to `ssr.noExternal` in the app's existing Vite configuration. Keep its plugins, Fumadocs provider, and any other `noExternal` entries:
+
+```ts
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  ssr: {
+    noExternal: ['@frantss/fumadocs-theme'],
+  },
+});
+```
+
+This bundles the theme with the app's Fumadocs code so they share provider contexts. Without it, TanStack Start with Nitro can report `You need to wrap your application inside FrameworkProvider` during prerendering, even when the build exits successfully. Check that the generated pages contain their expected content.
+
 ## Layout
 
 Import the themed components instead of their Fumadocs equivalents. Pass the app's own page tree and links:
@@ -69,7 +85,10 @@ Override Fumadocs `--color-fd-*` tokens, `--frantss-docs-link`, and `--frantss-d
 npm ci
 npm run build
 npm run typecheck
+npm test
 npm pack
 ```
 
 `npm pack` builds the package and includes its JavaScript, declarations, CSS, and this guide. It excludes source files and development dependencies. Install the generated tarball in another app with `npm install /path/to/frantss-fumadocs-theme-0.1.0.tgz`.
+
+`npm test` requires Node.js 22.12 or later and access to the npm registry. It packs the theme, installs the tarball in a temporary TanStack Start/Nitro fixture with locked dependencies, and builds the app. It checks server-rendering errors and the prerendered heading and body content. The temporary fixture is removed after the test.
