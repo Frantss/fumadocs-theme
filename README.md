@@ -6,10 +6,8 @@ Requires Fumadocs UI `^16.17.8`, React `^19.2.0`, and Tailwind CSS `^4.0.0`. Ver
 
 ## Install
 
-This package is not yet published to npm. Install it from GitHub:
-
 ```sh
-npm install git+https://github.com/Frantss/fumadocs-theme.git
+npm install @frantss/fumadocs-theme
 ```
 
 Replace the app's existing Fumadocs color and preset CSS imports with this global stylesheet:
