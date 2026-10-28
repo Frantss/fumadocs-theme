@@ -91,6 +91,6 @@ npm test
 npm pack
 ```
 
-`npm pack` builds the package and includes its JavaScript, declarations, CSS, and this guide. It excludes source files and development dependencies. Install the generated tarball in another app with `npm install /path/to/frantss-fumadocs-theme-0.1.1.tgz`.
+`npm pack` builds the package and includes its JavaScript, declarations, CSS, and this guide. It excludes source files and development dependencies. Install the generated tarball in another app with `npm install /path/to/frantss-fumadocs-theme-0.2.0.tgz`.
 
 `npm test` requires Node.js 22.12 or later and access to the npm registry. It packs the theme, installs the tarball in a temporary TanStack Start/Nitro fixture with locked dependencies, and builds the app. It checks server-rendering errors and the prerendered heading and body content. The temporary fixture is removed after the test.
