@@ -29,9 +29,27 @@
   --color-fd-ring: #6d28d9;
 }
 
+/* How much page sits above and below the window, driven by the window scroll (see body::before). */
+@property --frantss-docs-page-above {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --frantss-docs-page-below {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
 :root {
   --frantss-docs-link: #6d28d9;
   --frantss-docs-line-strong: #cccccc;
+  --frantss-docs-faint: #737373;
+  /* Bottom edge of raised controls. */
+  --frantss-docs-edge: #bdbdbd;
+  --frantss-docs-texture-edge-x: min(18rem, 20vw);
+  --frantss-docs-texture-edge-y: 16rem;
   color-scheme: light;
 }
 
@@ -54,6 +72,8 @@
   --color-fd-ring: #a78bfa;
   --frantss-docs-link: #c4b5fd;
   --frantss-docs-line-strong: #383838;
+  --frantss-docs-faint: #7d7d7d;
+  --frantss-docs-edge: #4a4a4a;
   color-scheme: dark;
 }
 
@@ -62,6 +82,78 @@ body {
   font-size: 14px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Dot grid behind the page that fades in from the window's left and right sides and from the top
+   and end of the page. The top fade leaves over the first fade-length of scroll and the bottom fade
+   arrives over the last, so both stay pinned to the page's real edges. Browsers without scroll
+   timelines keep a still top fade. */
+body::before {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--color-fd-foreground) 8%, var(--color-fd-background)) 0.75px,
+    transparent 1px
+  );
+  background-size: 8px 8px;
+  content: '';
+  mask-image:
+    linear-gradient(
+      to right,
+      #000,
+      transparent var(--frantss-docs-texture-edge-x),
+      transparent calc(100% - var(--frantss-docs-texture-edge-x)),
+      #000
+    ),
+    linear-gradient(
+      to bottom,
+      #000 calc(-1 * var(--frantss-docs-page-above)),
+      transparent calc(var(--frantss-docs-texture-edge-y) - var(--frantss-docs-page-above))
+    ),
+    linear-gradient(
+      to top,
+      #000 calc(-1 * var(--frantss-docs-page-below)),
+      transparent calc(var(--frantss-docs-texture-edge-y) - var(--frantss-docs-page-below))
+    );
+}
+
+@supports (animation-timeline: scroll()) {
+  body::before {
+    animation:
+      frantss-docs-page-top-away linear both,
+      frantss-docs-page-bottom-in linear both;
+    animation-timeline: scroll(root), scroll(root);
+    animation-range:
+      0 var(--frantss-docs-texture-edge-y),
+      calc(100% - var(--frantss-docs-texture-edge-y)) 100%;
+  }
+}
+
+@supports not (animation-timeline: scroll()) {
+  body::before {
+    --frantss-docs-page-below: var(--frantss-docs-texture-edge-y);
+  }
+}
+
+@keyframes frantss-docs-page-top-away {
+  from {
+    --frantss-docs-page-above: 0px;
+  }
+  to {
+    --frantss-docs-page-above: var(--frantss-docs-texture-edge-y);
+  }
+}
+
+@keyframes frantss-docs-page-bottom-in {
+  from {
+    --frantss-docs-page-below: var(--frantss-docs-texture-edge-y);
+  }
+  to {
+    --frantss-docs-page-below: 0px;
+  }
 }
 
 .frantss-docs-frame {
@@ -88,17 +180,111 @@ body {
   background: var(--color-fd-background);
 }
 
-#nd-sidebar [data-active='true'] {
+:is(#nd-sidebar, #nd-sidebar-mobile) [data-active='true'] {
   color: var(--color-fd-foreground);
   background: transparent;
 }
 
-#nd-sidebar a[data-active='true']::before {
+:is(#nd-sidebar, #nd-sidebar-mobile) a[data-active='true']::before {
   position: static;
   width: auto;
   background: none;
   color: var(--color-fd-primary);
-  content: '▸';
+  content: '❯';
+}
+
+/* Fumadocs renders sidebar separators as the sidebar's only paragraphs. */
+:is(#nd-sidebar, #nd-sidebar-mobile) p {
+  color: var(--frantss-docs-faint);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Raised controls carry a thicker bottom edge that compresses on press, like a key. Fumadocs only
+   exposes these data and ARIA hooks on its controls, so recheck them after a Fumadocs upgrade. */
+:is(
+  [data-search],
+  [data-search-full],
+  button[data-theme-toggle],
+  [data-theme-toggle] > button,
+  button[aria-controls='nd-sidebar'],
+  button[aria-controls='nd-sidebar-mobile']
+) {
+  position: relative;
+  border: 1px solid var(--frantss-docs-line-strong);
+  border-bottom: 2px solid var(--frantss-docs-edge);
+  border-radius: 3px;
+  background: var(--color-fd-card);
+  box-shadow: none;
+  color: var(--color-fd-muted-foreground);
+}
+
+:is(
+  [data-search],
+  [data-search-full],
+  button[data-theme-toggle],
+  [data-theme-toggle] > button,
+  button[aria-controls='nd-sidebar'],
+  button[aria-controls='nd-sidebar-mobile']
+):active {
+  border-bottom-width: 1px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :is(
+    [data-search],
+    [data-search-full],
+    button[data-theme-toggle],
+    [data-theme-toggle] > button,
+    button[aria-controls='nd-sidebar'],
+    button[aria-controls='nd-sidebar-mobile']
+  ):active {
+    translate: 0 1px;
+  }
+}
+
+@media (hover: hover) {
+  :is(
+    [data-search],
+    [data-search-full],
+    button[data-theme-toggle],
+    [data-theme-toggle] > button,
+    button[aria-controls='nd-sidebar'],
+    button[aria-controls='nd-sidebar-mobile']
+  ):hover {
+    border-color: var(--frantss-docs-faint);
+    border-bottom-color: var(--frantss-docs-edge);
+    background: color-mix(in oklab, var(--color-fd-card) 94%, var(--color-fd-foreground));
+    color: var(--color-fd-foreground);
+  }
+}
+
+[data-theme-toggle] > *,
+[data-search-full] kbd {
+  border-radius: 2px;
+}
+
+/* The sidebar footer boxes its links with the theme switch; the switch is already a key. */
+:is(#nd-sidebar, #nd-sidebar-mobile) div:has(> [data-theme-toggle]) {
+  border-color: transparent;
+  background: transparent;
+}
+
+/* The three-way theme switch is a row of keys; the selected one stays pressed in. */
+div[data-theme-toggle] {
+  gap: 0.25rem;
+  border: 0;
+  padding: 0;
+}
+
+[data-theme-toggle] > button.bg-fd-accent {
+  border-color: var(--color-fd-primary);
+  border-bottom-width: 1px;
+  translate: 0 1px;
+  background: var(--color-fd-accent);
+  color: var(--color-fd-foreground);
 }
 
 .frantss-docs-page {
@@ -107,11 +293,11 @@ body {
 }
 
 .frantss-docs-title {
-  border-left: 2px solid var(--color-fd-primary);
-  padding-left: 0.75rem;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.4;
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
   overflow-wrap: anywhere;
 }
 
@@ -124,7 +310,7 @@ body {
 .frantss-docs-prose {
   color: var(--color-fd-foreground);
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.7;
   overflow-wrap: anywhere;
 }
 
@@ -149,6 +335,7 @@ body {
 
 .frantss-docs-prose a {
   color: var(--frantss-docs-link);
+  text-decoration-line: underline;
   text-underline-offset: 0.15em;
 }
 
@@ -199,7 +386,7 @@ body {
 @media (prefers-reduced-motion: no-preference) {
   a,
   button {
-    transition-property: color, background-color, border-color, outline-color;
+    transition-property: color, background-color, border-color, outline-color, translate;
     transition-duration: 150ms;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }

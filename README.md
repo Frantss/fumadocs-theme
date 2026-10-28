@@ -1,6 +1,6 @@
 # @frantss/fumadocs-theme
 
-Geist Mono typography, light and dark palettes, square controls, and a centered documentation frame for Fumadocs. Includes TypeScript declarations and thin wrappers around Fumadocs components.
+Geist Mono typography, light and dark palettes, keycap controls, a faded dot texture, and a centered documentation frame for Fumadocs. Includes TypeScript declarations and thin wrappers around Fumadocs components.
 
 Requires Fumadocs UI `^16.17.8`, React `^19.2.0`, and Tailwind CSS `^4.0.0`. Verified with Fumadocs UI 16.17.8. The package does not configure routing, content, search, metadata, or the Fumadocs provider.
 
@@ -77,7 +77,9 @@ The frame defaults to `56rem`. Override its width after the theme import:
 }
 ```
 
-Override Fumadocs `--color-fd-*` tokens, `--frantss-docs-link`, and `--frantss-docs-line-strong` in `:root` and `.dark` to change the palette. Theme classes use the `frantss-docs-` prefix.
+Override Fumadocs `--color-fd-*` tokens and the `--frantss-docs-link`, `--frantss-docs-line-strong`, `--frantss-docs-faint`, and `--frantss-docs-edge` tokens in `:root` and `.dark` to change the palette. Theme classes use the `frantss-docs-` prefix.
+
+The keycap style targets the search triggers, the theme switch, and the sidebar triggers through the data and ARIA attributes Fumadocs puts on them. After a Fumadocs upgrade, check that these controls still have their raised bottom edge.
 
 ## Development
 
